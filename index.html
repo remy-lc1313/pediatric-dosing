@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Peds Dose">
+    <meta name="theme-color" content="#5a4fcf">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Pediatric Dosing</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(150deg, #5a4fcf 0%, #7b68ee 50%, #9370db 100%);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 16px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .weight-input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .weight-input {
+            flex: 1;
+            padding: 20px;
+            font-size: 2rem;
+            font-weight: 600;
+            border: 2px solid #e8e8e8;
+            border-radius: 16px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #fafafa;
+            color: #333;
+            min-width: 0;
+        }
+
+        .weight-input:focus {
+            border-color: #7b68ee;
+            background: white;
+        }
+
+        .weight-input::placeholder {
+            color: #ccc;
+        }
+
+        .unit-toggle {
+            display: flex;
+            flex-direction: column;
+            background: #f0f0f0;
+            border-radius: 14px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .unit-btn {
+            padding: 16px 20px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #999;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .unit-btn.active {
+            background: white;
+            color: #5a4fcf;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .unit-btn:active {
+            transform: scale(0.95);
+        }
+
+        .med-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .med-btn {
+            flex: 1;
+            padding: 24px 16px;
+            border: 3px solid #e8e8e8;
+            background: white;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .med-btn:active {
+            transform: scale(0.97);
+        }
+
+        .med-btn.tylenol {
+            color: #dc3545;
+        }
+
+        .med-btn.tylenol.active,
+        .med-btn.tylenol:active {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .med-btn.advil {
+            color: #0066cc;
+        }
+
+        .med-btn.advil.active,
+        .med-btn.advil:active {
+            border-color: #0066cc;
+            background: #f0f7ff;
+        }
+
+        .formulation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .formulation-btn {
+            padding: 20px;
+            border: 2px solid #e8e8e8;
+            background: white;
+            border-radius: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .formulation-btn:active {
+            transform: scale(0.98);
+            background: #f8f8ff;
+        }
+
+        .formulation-btn.active {
+            border-color: #7b68ee;
+            background: #f8f8ff;
+        }
+
+        .formulation-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .formulation-concentration {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #5a4fcf 0%, #7b68ee 100%);
+            color: white;
+        }
+
+        .result-card .card-title {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .dose-display {
+            text-align: center;
+            padding: 24px 0;
+        }
+
+        .dose-value {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .dose-unit {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-left: 4px;
+        }
+
+        .dose-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dose-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 1rem;
+        }
+
+        .dose-info-label {
+            opacity: 0.8;
+        }
+
+        .dose-info-value {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .disclaimer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            margin-top: 24px;
+            line-height: 1.5;
+            padding: 0 8px;
+        }
+
+        .back-btn {
+            background: #f0f0f0;
+            border: none;
+            color: #666;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn:active {
+            background: #e0e0e0;
+            transform: scale(0.98);
+        }
+
+        .reference-card {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .reference-toggle {
+            width: 100%;
+            padding: 18px 20px;
+            background: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reference-toggle:active {
+            background: #f8f8f8;
+        }
+
+        .toggle-icon {
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(180deg);
+        }
+
+        .reference-content {
+            padding: 0 20px 20px;
+        }
+
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .reference-table th,
+        .reference-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .reference-table th {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .reference-table td:first-child {
+            text-align: left;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .reference-table th:nth-child(2) {
+            color: #dc3545;
+        }
+
+        .reference-table th:nth-child(3) {
+            color: #0066cc;
+        }
+
+        .reference-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        @supports (-webkit-touch-callout: none) {
+            .weight-input {
+                font-size: 16px;
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 500px) {
+            body {
+                padding: 32px;
+            }
+
+            .container {
+                max-width: 450px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pediatric Dosing Calculator</h1>
+
+        <!-- Weight Input -->
+        <div class="card">
+            <div class="card-title">Child's Weight</div>
+            <div class="weight-input-group">
+                <input type="number" id="weight" class="weight-input" placeholder="0" min="0" step="0.1" inputmode="decimal">
+                <div class="unit-toggle">
+                    <button class="unit-btn" data-unit="lb">lb</button>
+                    <button class="unit-btn active" data-unit="kg">kg</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medication Selection -->
+        <div class="card" id="med-selection">
+            <div class="card-title">Select Medication</div>
+            <div class="med-buttons">
+                <button class="med-btn tylenol" data-med="tylenol">Tylenol</button>
+                <button class="med-btn advil" data-med="advil">Advil</button>
+            </div>
+        </div>
+
+        <!-- Formulation Selection -->
+        <div class="card hidden" id="formulation-selection">
+            <button class="back-btn" id="back-to-meds">← Back</button>
+            <div class="card-title"><span id="selected-med-name">Tylenol</span> Formulation</div>
+            <div class="formulation-list" id="formulation-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Result Display -->
+        <div class="card result-card hidden" id="result-card">
+            <div class="card-title">Recommended Dose</div>
+            <div class="dose-display">
+                <span class="dose-value" id="dose-value">--</span>
+                <span class="dose-unit" id="dose-unit">mL</span>
+            </div>
+            <div class="dose-info">
+                <div class="dose-info-row">
+                    <span class="dose-info-label">Frequency</span>
+                    <span class="dose-info-value" id="frequency">--</span>
+                </div>
+                <div class="dose-info-row">
+                    <span class="dose-info-label">Max per day</span>
+                    <span class="dose-info-value" id="max-doses">--</span>
+                </div>
+                <div class="dose-info-row">
+                    <span class="dose-info-label">Amount</span>
+                    <span class="dose-info-value" id="active-ingredient">--</span>
+                </div>
+            </div>
+            <div class="warning hidden" id="warning-message"></div>
+        </div>
+
+        <!-- Reference Info -->
+        <div class="card reference-card" id="reference-card">
+            <button class="reference-toggle" id="reference-toggle">
+                Dosing Reference <span class="toggle-icon">▼</span>
+            </button>
+            <div class="reference-content hidden" id="reference-content">
+                <table class="reference-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Tylenol</th>
+                            <th>Advil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dose</td>
+                            <td>15 mg/kg</td>
+                            <td>10 mg/kg</td>
+                        </tr>
+                        <tr>
+                            <td>Frequency</td>
+                            <td>q4-6h</td>
+                            <td>q6-8h</td>
+                        </tr>
+                        <tr>
+                            <td>Max/day</td>
+                            <td>75 mg/kg</td>
+                            <td>40 mg/kg</td>
+                        </tr>
+                        <tr>
+                            <td>Max dose</td>
+                            <td>1000 mg</td>
+                            <td>400 mg</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <p class="disclaimer">
+            For informational purposes only. Always consult a pediatrician or pharmacist. Verify dosing on product packaging.
+        </p>
+    </div>
+
+    <script>
+        // Medication data
+        const medications = {
+            tylenol: {
+                name: 'Tylenol',
+                ingredient: 'Acetaminophen',
+                mgPerKg: 15,
+                frequency: 'Every 4-6 hrs',
+                maxDosesPerDay: 5,
+                maxDailyMgPerKg: 75,
+                formulations: [
+                    { id: 'infant-drops', name: 'Infant\'s Drops', concentration: 80, unit: 'mg/1mL', measureUnit: 'mL', perAmount: 1 },
+                    { id: 'children-liquid', name: 'Children\'s Liquid', concentration: 160, unit: 'mg/5mL', measureUnit: 'mL', perAmount: 5 }
+                ]
+            },
+            advil: {
+                name: 'Advil',
+                ingredient: 'Ibuprofen',
+                mgPerKg: 10,
+                frequency: 'Every 6-8 hrs',
+                maxDosesPerDay: 4,
+                maxDailyMgPerKg: 40,
+                minAgeMonths: 6,
+                formulations: [
+                    { id: 'infant-drops', name: 'Infant\'s Drops', concentration: 50, unit: 'mg/1.25mL', measureUnit: 'mL', perAmount: 1.25 },
+                    { id: 'children-liquid', name: 'Children\'s Liquid', concentration: 100, unit: 'mg/5mL', measureUnit: 'mL', perAmount: 5 }
+                ]
+            }
+        };
+
+        // State
+        let currentUnit = 'kg';
+        let currentMed = null;
+        let currentFormulation = null;
+
+        // DOM elements
+        const weightInput = document.getElementById('weight');
+        const unitBtns = document.querySelectorAll('.unit-btn');
+        const medBtns = document.querySelectorAll('.med-btn');
+        const medSelection = document.getElementById('med-selection');
+        const formulationSelection = document.getElementById('formulation-selection');
+        const formulationList = document.getElementById('formulation-list');
+        const selectedMedName = document.getElementById('selected-med-name');
+        const resultCard = document.getElementById('result-card');
+        const backToMeds = document.getElementById('back-to-meds');
+
+        // Unit toggle
+        unitBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                unitBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentUnit = btn.dataset.unit;
+                calculateDose();
+            });
+        });
+
+        // Medication selection
+        medBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                medBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMed = btn.dataset.med;
+                currentFormulation = null;
+                showFormulations();
+            });
+        });
+
+        // Back button
+        backToMeds.addEventListener('click', () => {
+            formulationSelection.classList.add('hidden');
+            medSelection.classList.remove('hidden');
+            resultCard.classList.add('hidden');
+            medBtns.forEach(b => b.classList.remove('active'));
+            currentMed = null;
+            currentFormulation = null;
+        });
+
+        // Weight input
+        weightInput.addEventListener('input', calculateDose);
+
+        // Reference toggle
+        const referenceToggle = document.getElementById('reference-toggle');
+        const referenceContent = document.getElementById('reference-content');
+        const toggleIcon = document.querySelector('.toggle-icon');
+
+        referenceToggle.addEventListener('click', () => {
+            referenceContent.classList.toggle('hidden');
+            toggleIcon.classList.toggle('open');
+        });
+
+        function showFormulations() {
+            const med = medications[currentMed];
+            selectedMedName.textContent = med.name;
+
+            formulationList.innerHTML = med.formulations.map(f => `
+                <button class="formulation-btn" data-formulation="${f.id}">
+                    <div class="formulation-name">${f.name}</div>
+                    <div class="formulation-concentration">${f.concentration} ${f.unit}</div>
+                </button>
+            `).join('');
+
+            document.querySelectorAll('.formulation-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.formulation-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFormulation = btn.dataset.formulation;
+                    calculateDose();
+                });
+            });
+
+            medSelection.classList.add('hidden');
+            formulationSelection.classList.remove('hidden');
+        }
+
+        function calculateDose() {
+            if (!currentMed || !currentFormulation || !weightInput.value) {
+                resultCard.classList.add('hidden');
+                return;
+            }
+
+            const weight = parseFloat(weightInput.value);
+            if (isNaN(weight) || weight <= 0) {
+                resultCard.classList.add('hidden');
+                return;
+            }
+
+            const weightKg = currentUnit === 'lb' ? weight * 0.453592 : weight;
+            const med = medications[currentMed];
+            const formulation = med.formulations.find(f => f.id === currentFormulation);
+
+            const doseMg = weightKg * med.mgPerKg;
+            const mgPerUnit = formulation.concentration / formulation.perAmount;
+            let doseAmount = doseMg / mgPerUnit;
+
+            if (formulation.measureUnit === 'mL') {
+                doseAmount = Math.round(doseAmount * 4) / 4;
+            } else {
+                doseAmount = Math.round(doseAmount * 2) / 2;
+            }
+
+            document.getElementById('dose-value').textContent = doseAmount;
+            document.getElementById('dose-unit').textContent = formulation.measureUnit;
+            document.getElementById('frequency').textContent = med.frequency;
+            document.getElementById('max-doses').textContent = med.maxDosesPerDay + ' doses';
+            document.getElementById('active-ingredient').textContent = `${Math.round(doseMg)} mg`;
+
+            const warningEl = document.getElementById('warning-message');
+            const warnings = [];
+
+            if (currentMed === 'advil' && weightKg < 5.5) {
+                warnings.push('Ibuprofen is not recommended for infants under 6 months.');
+            }
+
+            if (doseAmount <= 0) {
+                warnings.push('Weight may be too low. Consult a pediatrician.');
+            }
+
+            const maxSingleDoseMg = currentMed === 'tylenol' ? 1000 : 400;
+            if (doseMg > maxSingleDoseMg) {
+                warnings.push(`Max single dose: ${maxSingleDoseMg} mg.`);
+                const cappedDoseAmount = (maxSingleDoseMg / mgPerUnit);
+                document.getElementById('dose-value').textContent = formulation.measureUnit === 'mL'
+                    ? Math.round(cappedDoseAmount * 4) / 4
+                    : Math.round(cappedDoseAmount * 2) / 2;
+                document.getElementById('active-ingredient').textContent = `${maxSingleDoseMg} mg (max)`;
+            }
+
+            if (warnings.length > 0) {
+                warningEl.textContent = warnings.join(' ');
+                warningEl.classList.remove('hidden');
+            } else {
+                warningEl.classList.add('hidden');
+            }
+
+            resultCard.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
